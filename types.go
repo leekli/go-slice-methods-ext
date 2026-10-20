@@ -8,9 +8,3 @@ type AllowedSliceTypes interface {
 }
 
 type Slice[T AllowedSliceTypes] []T
-
-func (slice Slice[T]) forEach(callback func(elem T)) {
-	for i := 0; i < len(slice); i++ {
-		callback(slice[i])
-	}
-}
