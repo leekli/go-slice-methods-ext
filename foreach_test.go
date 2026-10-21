@@ -7,54 +7,126 @@ import (
 )
 
 func TestForEach_ExecutesSuccessfully_EmptySlice(test *testing.T) {
-	input := Slice[int]{}
-	callback := func(elem int) {}
+	input := []int{}
+	callback := func(elem int, index int) {}
 
-	input.forEach(callback)
+	ForEach(input, callback)
 
-	assert.NotPanics(test, func() { input.forEach(callback) })
+	assert.NotPanics(test, func() { ForEach(input, callback) })
 }
 
 func TestForEach_ExecutesSuccessfully_NonEmptySlice_VaryingTypes(test *testing.T) {
-	stringSlice := Slice[string]{"Hello", "World"}
-	stringCallback := func(elem string) {}
+	stringSlice := []string{"Hello", "World"}
+	stringCallback := func(elem string, index int) {}
 
-	stringSlice.forEach(stringCallback)
+	ForEach(stringSlice, stringCallback)
 
-	assert.NotPanics(test, func() { stringSlice.forEach(stringCallback) })
+	assert.NotPanics(test, func() { ForEach(stringSlice, stringCallback) })
 
-	intSlice := Slice[int]{1, 2, 3}
-	intCallback := func(elem int) {}
+	intSlice := []int{1, 2, 3}
+	intCallback := func(elem int, index int) {}
 
-	intSlice.forEach(intCallback)
+	ForEach(intSlice, intCallback)
 
-	assert.NotPanics(test, func() { intSlice.forEach(intCallback) })
+	assert.NotPanics(test, func() { ForEach(intSlice, intCallback) })
 
-	floatSlice := Slice[float32]{0.9, 1.344, 4234, 22}
-	floatCallback := func(elem float32) {}
+	floatSlice := []float32{0.9, 1.344, 4234, 22}
+	floatCallback := func(elem float32, index int) {}
 
-	floatSlice.forEach(floatCallback)
+	ForEach(floatSlice, floatCallback)
 
-	assert.NotPanics(test, func() { floatSlice.forEach(floatCallback) })
+	assert.NotPanics(test, func() { ForEach(floatSlice, floatCallback) })
 
-	boolSlice := Slice[bool]{true, false}
-	boolCallback := func(elem bool) {}
+	boolSlice := []bool{true, false}
+	boolCallback := func(elem bool, index int) {}
 
-	boolSlice.forEach(boolCallback)
+	ForEach(boolSlice, boolCallback)
 
-	assert.NotPanics(test, func() { boolSlice.forEach(boolCallback) })
+	assert.NotPanics(test, func() { ForEach(boolSlice, boolCallback) })
 }
 
 func TestForEach_InvokesCallbackFunction_ForCorrectNumOfSliceElementTimes(test *testing.T) {
-	input := Slice[string]{"Hello", "World"}
+	input := []string{"Hello", "World"}
 	count := 0
-	callback := func(elem string) {
+	callback := func(elem string, index int) {
 		count++
 	}
 
-	expectedCount := 2
+	ForEach(input, callback)
 
-	input.forEach(callback)
+	assert.Equal(test, count, len(input))
+}
 
-	assert.Equal(test, expectedCount, count)
+func TestForEach_IterationPassesInCorrectOrder(test *testing.T) {
+	input := []string{"Apple", "Banana", "Cherry"}
+	var collectedElements []string
+	var collectedIndices []int
+
+	callback := func(elem string, index int) {
+		collectedElements = append(collectedElements, elem)
+		collectedIndices = append(collectedIndices, index)
+	}
+
+	ForEach(input, callback)
+
+	assert.Equal(test, input, collectedElements)
+	assert.Equal(test, []int{0, 1, 2}, collectedIndices)
+}
+
+func TestForEach_EmptyAndNilSlices(test *testing.T) {
+	// Empty slice
+	input := []int{}
+	emptyCount := 0
+
+	callback := func(elem int, index int) {
+		emptyCount++
+	}
+
+	ForEach(input, callback)
+
+	assert.Equal(test, 0, emptyCount)
+
+	// nil slice (should not panic)
+	var nilSlice []int
+	nilCount := 0
+
+	assert.NotPanics(test, func() {
+		ForEach(nilSlice, func(elem int, index int) {
+			nilCount++
+		})
+	})
+
+	assert.Equal(test, 0, nilCount)
+}
+
+func TestForEach_PointerMutation(test *testing.T) {
+	type User struct {
+		Name string
+	}
+
+	users := []*User{
+		{Name: "Alice"},
+		{Name: "Bob"},
+	}
+
+	// Mutate fields through pointer semantics
+	ForEach(users, func(u *User, index int) {
+		u.Name = u.Name + "_updated"
+	})
+
+	assert.Equal(test, "Alice_updated", users[0].Name)
+	assert.Equal(test, "Bob_updated", users[1].Name)
+}
+
+func TestForEach_PanicPropagation(test *testing.T) {
+	input := []int{1, 2, 3}
+
+	// Verify that a panic inside the callback propagates correctly
+	assert.Panics(test, func() {
+		ForEach(input, func(elem int, index int) {
+			if index == 1 {
+				panic("callback failure")
+			}
+		})
+	})
 }

@@ -1,7 +1,7 @@
 package methods
 
-func (slice Slice[T]) forEach(callback func(elem T)) {
-	for i := 0; i < len(slice); i++ {
-		callback(slice[i])
+func ForEach[T any](slice []T, callback func(elem T, index int)) {
+	for i, v := range slice {
+		callback(v, i)
 	}
 }
