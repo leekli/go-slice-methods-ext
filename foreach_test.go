@@ -1,6 +1,10 @@
 package methods
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -129,4 +133,34 @@ func TestForEach_PanicPropagation(test *testing.T) {
 			}
 		})
 	})
+}
+
+func TestForEach_CanSuccessfullyCallExternalFunc_PrintLn(test *testing.T) {
+	input := []string{"Apple", "Banana"}
+
+	// Create a pipe to intercept stdout
+	r, w, err := os.Pipe()
+
+	assert.NoError(test, err)
+
+	os.Stdout = w // Point stdout to our write pipe
+
+	// Execute ForEach using fmt.Println in the callback wrapper
+	ForEach(input, func(elem string, index int) {
+		fmt.Println(elem)
+	})
+
+	// Close the writer
+	_ = w.Close()
+
+	// Read all data captured by the read pipe into a buffer
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, r)
+	assert.NoError(test, err)
+
+	output := buf.String()
+
+	// Assert that fmt.Println was called and printed the expected lines
+	assert.Contains(test, output, "Apple\n")
+	assert.Contains(test, output, "Banana\n")
 }
