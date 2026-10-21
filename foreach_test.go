@@ -113,7 +113,7 @@ func TestForEach_PointerMutation(test *testing.T) {
 		{Name: "Bob"},
 	}
 
-	// Mutate fields through pointer semantics
+	// Mutate fields through pointer
 	ForEach(users, func(u *User, index int) {
 		u.Name = u.Name + "_updated"
 	})
