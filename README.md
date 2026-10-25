@@ -44,13 +44,13 @@ This package implements extended methods to be used on Go Slices of varying type
 
 3. `Filter`
 
-- **What:** Creates a new copy of a portion of a given slice, filtered down to just the elements from the given slice that pass the test implemented by the provided function.
+- **What:** Creates a new copy of a portion of a given slice, filtered down to just the elements from the given slice that pass the test implemented by the provided function (a predicate function).
 - **How:**
 
 ```go
 	input := []string{"ABC", "ABCDE"}
 
-	output := Filter(input, func(elem string, index int) string {
+	output := Filter(input, func(elem string, index int) bool {
 		return len(elem) <= 3
 	})
 
