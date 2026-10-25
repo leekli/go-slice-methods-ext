@@ -15,3 +15,15 @@ func Map[T any](slice []T, callback func(elem T, index int) T) []T {
 
 	return mappedSlice
 }
+
+func Filter[T any](slice []T, callback func(elem T, index int) bool) []T {
+	filteredSlice := []T{}
+
+	for i, v := range slice {
+		if callback(v, i) {
+			filteredSlice = append(filteredSlice, v)
+		}
+	}
+
+	return filteredSlice
+}
