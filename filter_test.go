@@ -56,6 +56,30 @@ func TestFilter_ExecutesSuccessfully_NonEmptySlice_VaryingTypes(test *testing.T)
 	assert.Equal(test, true, boolOutput[0])
 }
 
+func TestFilter_LargerCallbackFunction_MoreRoutes(test *testing.T) {
+	input := []int{-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
+	callback := func(elem int, index int) bool {
+		if elem < 2 {
+			return false
+		}
+
+		if elem%2 == 0 {
+			return elem == 2
+		}
+
+		for factor := 3; factor*factor <= elem; factor += 2 {
+			if elem%factor == 0 {
+				return false
+			}
+		}
+		return true
+	}
+
+	output := Filter(input, callback)
+
+	assert.Equal(test, []int{2, 3, 5, 7, 11, 13}, output)
+}
+
 func TestFilter_InvokesCallbackFunction_ForCorrectNumOfSliceElementTimes(test *testing.T) {
 	input := []string{"Hello", "World"}
 	count := 0
