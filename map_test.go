@@ -116,7 +116,6 @@ func TestMap_EmptyAndNilSlices(test *testing.T) {
 func TestMap_NormalMutation(test *testing.T) {
 	input := []string{"Apple", "Banana", "Cherry"}
 
-	// Mutate fields through pointer
 	output := Map(input, func(elem string, index int) string {
 		newString := elem + "lay"
 
@@ -165,6 +164,17 @@ func TestMap_ShouldNotMutateOriginalInput(test *testing.T) {
 	assert.Equal(test, "Banana", input[1])
 	assert.Equal(test, "Cherry", input[2])
 	assert.Equal(test, len(input), len(output))
+}
+
+func TestMap_TwoSliceReferencesNotTheSame(test *testing.T) {
+	input := []string{"Apple", "Banana", "Cherry"}
+
+	output := Map(input, func(elem string, index int) string {
+		return elem
+	})
+
+	assert.Equal(test, len(input), len(output))
+	assert.NotSame(test, &input, &output)
 }
 
 func TestMap_PanicPropagation(test *testing.T) {
