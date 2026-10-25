@@ -164,3 +164,149 @@ func TestForEach_CanSuccessfullyCallExternalFunc_PrintLn(test *testing.T) {
 	assert.Contains(test, output, "Apple\n")
 	assert.Contains(test, output, "Banana\n")
 }
+
+func TestForEach_StructValueType(t *testing.T) {
+	type Counter struct {
+		Value int
+	}
+
+	input := []Counter{{1}, {2}, {3}}
+	sum := 0
+
+	ForEach(input, func(c Counter, i int) {
+		sum += c.Value + i
+	})
+
+	assert.Equal(t, 1+0+2+1+3+2, sum)
+
+	// Original input slice is not mutated
+	assert.Equal(t, 1, input[0].Value)
+}
+
+func TestForEach_StructPointerType(t *testing.T) {
+	type Node struct {
+		Data string
+	}
+
+	input := []*Node{
+		{Data: "first"},
+		{Data: "second"},
+		{Data: "third"},
+	}
+
+	ForEach(input, func(n *Node, i int) {
+		n.Data = fmt.Sprintf("%s-%d", n.Data, i)
+	})
+
+	assert.Equal(t, "first-0", input[0].Data)
+	assert.Equal(t, "second-1", input[1].Data)
+	assert.Equal(t, "third-2", input[2].Data)
+}
+
+func TestForEach_FromFixedArray(t *testing.T) {
+	arr := [5]string{"a", "b", "c", "d", "e"}
+	slice := arr[:]
+	var collected []string
+
+	ForEach(slice, func(s string, i int) {
+		collected = append(collected, fmt.Sprintf("%s%d", s, i))
+	})
+
+	assert.Equal(t, []string{"a0", "b1", "c2", "d3", "e4"}, collected)
+	assert.Equal(t, [5]string{"a", "b", "c", "d", "e"}, arr)
+}
+
+func TestForEach_CustomTypeAndComplex(t *testing.T) {
+	type Flag bool
+	input := []Flag{true, false, true}
+	countTrue := 0
+
+	ForEach(input, func(f Flag, _ int) {
+		if f {
+			countTrue++
+		}
+	})
+
+	assert.Equal(t, 2, countTrue)
+
+	inputC := []complex128{1 + 1i, 2 + 2i}
+
+	var sum complex128
+
+	ForEach(inputC, func(c complex128, _ int) {
+		sum += c
+	})
+
+	assert.Equal(t, 3+3i, sum)
+}
+
+func TestForEach_InterfaceSlice(t *testing.T) {
+	input := []any{10, "hello", 3.14, true}
+	var results []string
+
+	ForEach(input, func(v any, i int) {
+		results = append(results, fmt.Sprintf("%d:%v", i, v))
+	})
+
+	assert.Equal(t, []string{"0:10", "1:hello", "2:3.14", "3:true"}, results)
+}
+
+func TestForEach_MapAsElement(t *testing.T) {
+	input := []map[string]int{
+		{"x": 1},
+		{"y": 2, "z": 3},
+	}
+	total := 0
+
+	ForEach(input, func(m map[string]int, _ int) {
+		for _, v := range m {
+			total += v
+		}
+	})
+
+	assert.Equal(t, 6, total)
+}
+
+func TestForEach_SideEffectsAndIndex(t *testing.T) {
+	input := []int{5, 10, 15, 20}
+	var doubled []int
+	var indices []int
+
+	ForEach(input, func(v int, i int) {
+		doubled = append(doubled, v*2)
+		indices = append(indices, i)
+	})
+
+	assert.Equal(t, []int{10, 20, 30, 40}, doubled)
+	assert.Equal(t, []int{0, 1, 2, 3}, indices)
+}
+
+func TestForEach_LargeSlice(t *testing.T) {
+	const n = 50_000
+	input := make([]int, n)
+	for i := range input {
+		input[i] = 1
+	}
+
+	sum := 0
+	ForEach(input, func(v int, _ int) {
+		sum += v
+	})
+
+	assert.Equal(t, n, sum)
+}
+
+func TestForEach_NilElements(t *testing.T) {
+	input := []*int{nil, new(int), nil}
+	*input[1] = 99
+	countNonNil := 0
+
+	ForEach(input, func(p *int, _ int) {
+		if p != nil {
+			countNonNil++
+			assert.Equal(t, 99, *p)
+		}
+	})
+
+	assert.Equal(t, 1, countNonNil)
+}

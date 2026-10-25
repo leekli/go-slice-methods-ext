@@ -1,6 +1,7 @@
 package methods
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -190,4 +191,213 @@ func TestMap_PanicPropagation(test *testing.T) {
 			return elem
 		})
 	})
+}
+
+func TestMap_StructValueType(t *testing.T) {
+	type Person struct {
+		Name string
+		Age  int
+	}
+
+	input := []Person{
+		{Name: "Alice", Age: 30},
+		{Name: "Bob", Age: 25},
+		{Name: "Carol", Age: 40},
+	}
+
+	output := Map(input, func(p Person, i int) Person {
+		p.Age += 1
+		p.Name = p.Name + "_senior"
+		return p
+	})
+
+	assert.Equal(t, 3, len(output))
+	assert.Equal(t, "Alice_senior", output[0].Name)
+	assert.Equal(t, 31, output[0].Age)
+	assert.Equal(t, "Bob_senior", output[1].Name)
+	assert.Equal(t, 26, output[1].Age)
+	assert.Equal(t, "Carol_senior", output[2].Name)
+	assert.Equal(t, 41, output[2].Age)
+
+	// Original must remain unchanged
+	assert.Equal(t, "Alice", input[0].Name)
+	assert.Equal(t, 30, input[0].Age)
+}
+
+func TestMap_StructPointerType(t *testing.T) {
+	type Point struct {
+		X, Y float64
+	}
+
+	input := []*Point{
+		{X: 1.0, Y: 2.0},
+		{X: 3.0, Y: 4.0},
+	}
+
+	output := Map(input, func(p *Point, i int) *Point {
+		p.X *= 2
+		p.Y *= 2
+
+		return p
+	})
+
+	assert.Equal(t, 2, len(output))
+	assert.Equal(t, 2.0, output[0].X)
+	assert.Equal(t, 4.0, output[0].Y)
+	assert.Equal(t, 6.0, output[1].X)
+	assert.Equal(t, 8.0, output[1].Y)
+
+	// Original *should* be mutated due to pointer use
+	assert.Equal(t, 2.0, input[0].X)
+	assert.Equal(t, 4.0, input[0].Y)
+}
+
+func TestMap_FromFixedArray(t *testing.T) {
+	arr := [4]int{10, 20, 30, 40}
+	slice := arr[:] // Convert array to slice
+
+	output := Map(slice, func(v int, i int) int {
+		return v + i*100
+	})
+
+	assert.Equal(t, []int{10, 120, 230, 340}, output)
+	assert.Equal(t, [4]int{10, 20, 30, 40}, arr) // Original array not mutated
+}
+
+func TestMap_NestedSlices(t *testing.T) {
+	input := [][]string{
+		{"a", "b"},
+		{"c"},
+		{},
+		{"d", "e", "f"},
+	}
+
+	output := Map(input, func(s []string, i int) []string {
+		return append([]string{}, append(s, fmt.Sprintf("idx-%d", i))...)
+	})
+
+	assert.Equal(t, 4, len(output))
+	assert.Equal(t, []string{"a", "b", "idx-0"}, output[0])
+	assert.Equal(t, []string{"c", "idx-1"}, output[1])
+	assert.Equal(t, []string{"idx-2"}, output[2])
+	assert.Equal(t, []string{"d", "e", "f", "idx-3"}, output[3])
+}
+
+func TestMap_CustomTypeAndComplex(t *testing.T) {
+	type ID int
+
+	inputIDs := []ID{1, 2, 3}
+
+	outIDs := Map(inputIDs, func(id ID, i int) ID {
+		return id * 10
+	})
+
+	assert.Equal(t, []ID{10, 20, 30}, outIDs)
+
+	inputC := []complex128{1 + 2i, 3 + 4i}
+
+	outC := Map(inputC, func(c complex128, i int) complex128 {
+		return c * 2
+	})
+
+	assert.Equal(t, []complex128{2 + 4i, 6 + 8i}, outC)
+}
+
+func TestMap_InterfaceSlice(t *testing.T) {
+	input := []any{1, "two", 3.0, true}
+
+	output := Map(input, func(v any, i int) any {
+		switch val := v.(type) {
+		case int:
+			return val * 10
+		case string:
+			return val + "!"
+		case float64:
+			return val * 2
+		case bool:
+			return !val
+		default:
+			return v
+		}
+	})
+
+	assert.Equal(t, []any{10, "two!", 6.0, false}, output)
+}
+
+func TestMap_MapAsElement(t *testing.T) {
+	input := []map[string]int{
+		{"a": 1},
+		{"b": 2, "c": 3},
+	}
+
+	output := Map(input, func(m map[string]int, i int) map[string]int {
+		newM := make(map[string]int, len(m)+1)
+		for k, v := range m {
+			newM[k] = v
+		}
+		newM["index"] = i
+
+		return newM
+	})
+
+	assert.Equal(t, 2, len(output))
+	assert.Equal(t, 1, output[0]["a"])
+	assert.Equal(t, 0, output[0]["index"])
+	assert.Equal(t, 2, output[1]["b"])
+	assert.Equal(t, 3, output[1]["c"])
+	assert.Equal(t, 1, output[1]["index"])
+}
+
+func TestMap_LargeSliceAndIndexUsage(t *testing.T) {
+	const n = 10_000
+
+	input := make([]int, n)
+
+	for i := range input {
+		input[i] = i
+	}
+
+	output := Map(input, func(v int, i int) int {
+		return v + i
+	})
+
+	assert.Equal(t, n, len(output))
+	assert.Equal(t, 0, output[0])
+	assert.Equal(t, 1+1, output[1])
+	assert.Equal(t, (n-1)+(n-1), output[n-1])
+}
+
+func TestMap_ZeroValuesAndNilElements(t *testing.T) {
+	type Node struct {
+		Val *int
+	}
+
+	input := []Node{
+		{},
+		{Val: new(int)},
+	}
+
+	*input[1].Val = 42
+
+	output := Map(input, func(n Node, i int) Node {
+		if n.Val == nil {
+			return Node{}
+		}
+		v := *n.Val * 2
+
+		return Node{Val: &v}
+	})
+
+	assert.Nil(t, output[0].Val)
+	assert.NotNil(t, output[1].Val)
+	assert.Equal(t, 84, *output[1].Val)
+}
+
+func TestMap_IdentityPreservesContent(t *testing.T) {
+	input := []string{"x", "y", "z"}
+
+	output := Map(input, func(s string, _ int) string { return s })
+	
+	assert.Equal(t, input, output)
+	assert.NotSame(t, &input, &output)
 }
