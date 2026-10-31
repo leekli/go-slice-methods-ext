@@ -27,3 +27,15 @@ func Filter[T any](slice []T, callback func(elem T, index int) bool) []T {
 
 	return filteredSlice
 }
+
+func Reduce[T any](slice []T, callback func(accumulator T, currentValue T, index int) T, initialValue T) T {
+	var finalValue T
+
+	finalValue = initialValue
+
+	for i, v := range slice {
+		finalValue = callback(finalValue, v, i)
+	}
+
+	return finalValue
+}

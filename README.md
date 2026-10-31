@@ -11,6 +11,7 @@ This package provides generic helpers that mirror the most commonly used JavaScr
 - **ForEach** – run a function once for every element
 - **Map** – transform every element into a new value (same type)
 - **Filter** – keep only the elements that pass a test
+- **Reduce** – reduces all elements of a slice into a single value
 
 They work with any slice type using Go generics.
 
@@ -105,6 +106,27 @@ adults := methods.Filter(ages, func(age int, _ int) bool {
 })
 
 // adults is []int{25, 42}
+```
+
+### Reduce
+
+```go
+func Reduce[T any](slice []T, callback func(accumulator T, currentValue T, index int) T, initialValue T) T
+```
+
+Executes a supplied "reducer" callback function on each element of the slice, in order, passing in the return value from the calculation on the preceding element. The final result of running the reducer across all elements of the slice is a single value.
+
+**Example**
+
+```go
+nums := []int{1, 2, 3, 4}
+initialValue := 0
+
+totalSum := methods.Reduce(nums, func(accumulator int, currentValue int, _ int) bool {
+    return return accumulator + currentValue
+}, initialValue)
+
+// totalSum is 10
 ```
 
 ---
