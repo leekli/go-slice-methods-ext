@@ -8,6 +8,7 @@ Inspired by the [MDN Array methods](https://developer.mozilla.org/en-US/docs/Web
 
 This package provides generic helpers that mirror the most commonly used JavaScript Array methods for the following (API reference below):
 
+- **At** – takes integer value, returns item at that index
 - **ForEach** – run a function once for every element
 - **Map** – transform every element into a new value (same type)
 - **Filter** – keep only the elements that pass a test
@@ -15,7 +16,7 @@ This package provides generic helpers that mirror the most commonly used JavaScr
 
 They work with any slice type using Go generics.
 
-> **Important note about `Map`**  
+> **Important note about `Map`**
 > Unlike JavaScript’s `Array.prototype.map`, this implementation always returns a slice of the **same** element type.
 
 ## Installation
@@ -37,12 +38,60 @@ import "github.com/leekli/go-slice-methods-ext"
 To run the tests:
 
 ```bash
-go test ./...
+go test -v ./...
 ```
 
 ---
 
 ## API References
+
+### At
+
+```go
+func At[T any](slice []T, index int) (T, bool)
+```
+
+Takes an integer value and returns the item at that index and if a value exists, allowing for positive and negative integers. Negative integers count back from the last item in the array.
+
+2 return values:
+- The `T` actual value if it exists
+- A `bool` value representing if the value exists
+
+**Examples**
+
+```go
+names := []string{"Alice", "Bob", "Carol"}
+
+value, exists := At(names, 1)
+
+if exists {
+    fmt.Println(value)
+}
+
+// Output prints: "Bob"
+```
+
+```go
+names := []string{"Alice", "Bob", "Carol"}
+
+value, exists := At(names, -1)
+
+if exists {
+    fmt.Println(value)
+}
+
+// Output prints: "Carol"
+```
+
+```go
+names := []int{1, 2, 3}
+
+_, exists := At(names, 3)
+
+if !exists {
+    fmt.Println("Value does not exist")
+}
+```
 
 ### ForEach
 
