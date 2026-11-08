@@ -1,0 +1,42 @@
+{
+  "name": "Go Repo devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/go:1.27-bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "go.useLanguageServer": true,
+        "go.lintTool": "golangci-lint",
+        "workbench.colorTheme": "SynthWave '84",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        "editor.wordWrap": "on",
+        "files.eol": "\n",
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "markdown.preview.breaks": true,
+        "markdown.extension.tableFormatter.enabled": true
+      },
+      "extensions": [
+        "golang.Go",
+        "ms-vscode-remote.remote-containers",
+        "dbaeumer.vscode-eslint",
+        "RobbOwen.synthwave-vscode",
+        "timonwong.shellcheck",
+        "github.vscode-github-actions",
+        "redhat.vscode-yaml",
+        "eamodio.gitlens",
+        "DavidAnson.vscode-markdownlint"
+      ]
+    }
+  },
+
+  "postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash",
+
+  "remoteUser": "vscode"
+}
