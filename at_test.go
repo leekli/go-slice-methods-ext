@@ -16,49 +16,48 @@ func TestAt_ExecutesSuccessfully(test *testing.T) {
 }
 
 func TestAt_ReturnsElementAndExistence_AtGivenIndex_SingleElement(test *testing.T) {
-		index := 0
+	index := 0
 
-		intInput := []int{2}
+	intInput := []int{2}
 
-		intValue, intExists := At(intInput, index)
-		assert.Equal(test, true, intExists)
-		assert.Equal(test, 2, intValue)
+	intValue, intExists := At(intInput, index)
+	assert.Equal(test, true, intExists)
+	assert.Equal(test, 2, intValue)
 
-		strInput := []string{"A"}
+	strInput := []string{"A"}
 
-		strValue, strExists := At(strInput, index)
-		assert.Equal(test, true, strExists)
-		assert.Equal(test, "A", strValue)
+	strValue, strExists := At(strInput, index)
+	assert.Equal(test, true, strExists)
+	assert.Equal(test, "A", strValue)
 
-		boolInput := []bool{true}
+	boolInput := []bool{true}
 
-		boolValue, boolExists := At(boolInput, index)
-		assert.Equal(test, true, boolExists)
-		assert.Equal(test, true, boolValue)
+	boolValue, boolExists := At(boolInput, index)
+	assert.Equal(test, true, boolExists)
+	assert.Equal(test, true, boolValue)
 }
 
 func TestAt_ReturnsElementAndExistence_AtGivenIndex_MultipleElements(test *testing.T) {
-		intInput := []int{24, 378, 221, -1, 33, 59}
-		intIndex := 3
+	intInput := []int{24, 378, 221, -1, 33, 59}
+	intIndex := 3
 
-		intValue, intExists := At(intInput, intIndex)
-		assert.Equal(test, true, intExists)
-		assert.Equal(test, -1, intValue)
+	intValue, intExists := At(intInput, intIndex)
+	assert.Equal(test, true, intExists)
+	assert.Equal(test, -1, intValue)
 
-		strInput := []string{"Hello", "World", "I", "Am", "A", "String"}
-		strIndex := 2
+	strInput := []string{"Hello", "World", "I", "Am", "A", "String"}
+	strIndex := 2
 
-		strValue, strExists := At(strInput, strIndex)
-		assert.Equal(test, true, strExists)
-		assert.Equal(test, "I", strValue)
+	strValue, strExists := At(strInput, strIndex)
+	assert.Equal(test, true, strExists)
+	assert.Equal(test, "I", strValue)
 
+	boolInput := []bool{true, false, false, true, true, true, false, true, false, false}
+	boolIndex := 8
 
-		boolInput := []bool{true, false, false, true, true, true, false, true, false, false}
-		boolIndex := 8
-
-		boolValue, boolExists := At(boolInput, boolIndex)
-		assert.Equal(test, true, boolExists)
-		assert.Equal(test, false, boolValue)
+	boolValue, boolExists := At(boolInput, boolIndex)
+	assert.Equal(test, true, boolExists)
+	assert.Equal(test, false, boolValue)
 }
 
 func TestAt_ReturnsFalseExistence_IfSliceIsEmpty(test *testing.T) {
@@ -140,5 +139,3 @@ func TestAt_ReturnsFalseExistence_WhenGivenANegativeIndex_AndItsBeyondSliceLen(t
 	assert.NotPanics(test, func() { At(input, index) })
 	assert.Equal(test, false, exists)
 }
-
-

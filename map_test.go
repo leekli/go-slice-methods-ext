@@ -397,7 +397,7 @@ func TestMap_IdentityPreservesContent(t *testing.T) {
 	input := []string{"x", "y", "z"}
 
 	output := Map(input, func(s string, _ int) string { return s })
-	
+
 	assert.Equal(t, input, output)
 	assert.NotSame(t, &input, &output)
 }

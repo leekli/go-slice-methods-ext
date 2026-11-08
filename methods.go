@@ -28,7 +28,7 @@ func At[T any](slice []T, index int) (T, bool) {
 		}
 
 		// Return the found value of given index and existence of true
-		return slice[len(slice) - absIndex], true
+		return slice[len(slice)-absIndex], true
 	}
 
 	return slice[index], true

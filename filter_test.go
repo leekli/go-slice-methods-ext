@@ -211,7 +211,7 @@ func TestFilter_StructValueType(t *testing.T) {
 
 func TestFilter_StructPointerType(t *testing.T) {
 	type Item struct {
-		ID    int
+		ID     int
 		Active bool
 	}
 
@@ -322,7 +322,7 @@ func TestFilter_AllPassAllFailAndIndex(t *testing.T) {
 	none := Filter(input, func(_ string, _ int) bool { return false })
 	assert.Equal(t, 0, len(none))
 
-	evenIdx := Filter(input, func(_ string, i int) bool { return i % 2 == 0 })
+	evenIdx := Filter(input, func(_ string, i int) bool { return i%2 == 0 })
 	assert.Equal(t, []string{"a", "ccc"}, evenIdx)
 }
 
